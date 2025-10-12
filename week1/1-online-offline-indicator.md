@@ -1,5 +1,10 @@
 ## Online offline indicator
 
+```
+Assignment: 
+Build a blocking queue implementation (as connection pool implementation)
+```
+
 Requirement: is a user online or offline
 Potential access patterns: Key value
 
