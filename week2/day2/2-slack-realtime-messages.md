@@ -168,7 +168,11 @@ Final design
 - Message service
     - Talking to message DB
 - REDIS PubSub
+    - All WSS servers use Redis PUBSUB as a bus to push messages to WSS
 - Web socket servers
+    - Cluster of websocket servers. 
 - Connection balancers
+    - A service that clients used to identify which websocket servers to connect to.
+    - This service can be used to route a workspace/company to a same web socket server
 - Membership service
     - Membership DB
