@@ -176,3 +176,9 @@ Final design
     - This service can be used to route a workspace/company to a same web socket server
 - Membership service
     - Membership DB
+
+---
+**Reading:**
+1. Redis PubSub
+    - How channels are created
+    - How to subscribe to channels
