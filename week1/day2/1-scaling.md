@@ -2,7 +2,7 @@
 
 ```
 Assignment: 
-Build a prototype to build a program that simulates hash based sharding. Like having multiple connections (shards)
+Prototype to build a program that simulates hash based sharding. Like having multiple connections (shards)
 ```
 
 ---
