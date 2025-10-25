@@ -1,0 +1,40 @@
+{
+  "commands": [
+    {
+      "name": "review",
+      "description": "Quick code review notes highlighting key issues and improvements",
+      "prompt": "{{file:prompts/code-reviewer.md}}\n\nPlease review the following code:\n\n{{selection}}"
+    },
+    {
+      "name": "explain",
+      "description": "Concise notes explaining code for learning and reference",
+      "prompt": "{{file:prompts/code-explainer.md}}\n\nPlease create notes for the following code:\n\n{{selection}}"
+    },
+    {
+      "name": "debug",
+      "description": "Structured debugging notes to identify and fix issues",
+      "prompt": "{{file:prompts/debugging-assistant.md}}\n\nPlease help debug this issue:\n\n{{selection}}"
+    },
+    {
+      "name": "perf",
+      "description": "Performance analysis notes with actionable optimizations",
+      "prompt": "{{file:prompts/performance-optimizer.md}}\n\nPlease analyze performance for:\n\n{{selection}}"
+    },
+    {
+      "name": "design",
+      "description": "Focused review notes on system designs",
+      "prompt": "{{file:prompts/system-design-reviewer.md}}\n\nPlease review this system design:\n\n{{selection}}"
+    },
+    {
+      "name": "arch",
+      "description": "Concise architectural guidance notes with recommendations",
+      "prompt": "{{file:prompts/architecture-advisor.md}}\n\nPlease provide architectural guidance for:\n\n{{selection}}"
+    },
+    {
+      "name": "notes",
+      "description": "Create clear, concise technical notes for quick reference",
+      "prompt": "{{file:prompts/technical-writer.md}}\n\nPlease create technical notes for:\n\n{{selection}}"
+    }
+  ]
+}
+
