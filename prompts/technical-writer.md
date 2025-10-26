@@ -52,6 +52,7 @@ You are creating technical notes for quick reference and learning. Please create
 - Use bold for key terms
 - Skip unnecessary details
 - Focus on practical usage over theory
+- **Prefer Java for all code examples**
 
 Create notes that someone can skim in 2-3 minutes and understand the essentials.
 

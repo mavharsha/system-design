@@ -36,6 +36,7 @@ You are reviewing code and creating concise notes on findings. Please provide fo
 - Show code before/after for fixes
 - Focus on the most important issues
 - Skip minor nitpicks unless critical
+- **Prefer Java for all code examples**
 
 Limit to 5-7 most important findings. Be constructive and practical.
 

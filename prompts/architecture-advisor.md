@@ -107,6 +107,7 @@ You are providing architectural guidance in note form. Please create focused arc
 - Keep it concise (aim for 10-15 bullet points)
 - Highlight trade-offs clearly
 - Prioritize by impact
+- **Prefer Java for all code examples and technical implementations**
 
 Create notes that give clear direction without overwhelming detail.
 

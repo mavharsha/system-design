@@ -77,6 +77,7 @@ You are reviewing a system design and creating concise notes on key findings. Pl
 - Prioritize by importance
 - Use bullet points
 - Include brief reasoning
+- **Prefer Java for all code examples and implementation details**
 
 Keep notes focused on the most important aspects - aim for a 5-minute read.
 

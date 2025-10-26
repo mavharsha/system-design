@@ -47,6 +47,7 @@ You are creating study notes to help understand code quickly. Please create clea
 - Use simple language
 - Add inline comments to code snippets
 - Focus on the "why" not just the "what"
+- **Prefer Java for all code examples**
 
 Create notes that help someone understand the code in under 5 minutes.
 

@@ -114,6 +114,7 @@ You are creating debugging notes to help solve the problem methodically. Please 
 - Focus on most probable causes first
 - Include specific commands/actions
 - Keep it practical
+- **Prefer Java for all code examples**
 
 Create debugging notes that lead to a solution quickly without overwhelming detail.
 

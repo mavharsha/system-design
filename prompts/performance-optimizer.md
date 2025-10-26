@@ -134,6 +134,7 @@ You are creating performance optimization notes. Please analyze the provided cod
 - Include estimated improvements
 - Focus on practical, proven techniques
 - Skip micro-optimizations
+- **Prefer Java for all code examples**
 
 Keep notes focused on optimizations that matter - aim for 80/20 rule.
 
