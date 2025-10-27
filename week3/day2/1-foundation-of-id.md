@@ -1,25 +1,86 @@
 ## Foundation of IDs
+```
+Problem: assign a globally unique ID to `anything`.
+```
+Write a function that generates
+Something unique every time 
 
-Something unique that is generate 
+Auto increment ID work for single instance of DB
+When we shard data, auto increment of ID's don't work.
+Example:
+tweetID - generated on shard1 and tweetId generate on shard2 can be same when using sequential auto increment. (collision)
+
+Typically when DB sharded, there is a need for central ID generation service.
+
+So, we need a function that generates a unique ID every TIME it is generated.
+
+Potential solutions:
 
 ### Basic 
+```
 getEpocMilliseconds
+```
+Issue: Same Id across rows. Collision
 
 **Across to computers**
+Add machine identification
 ```
 M1 => M1-${getEpocMilliseconds}
 M2 => M2-${getEpocMilliseconds}
 ```
+Issue: What happens if the application has multiple threads calling at the same time. Collision.
+Alternative:
+1. Add thread to generation. (MachineId-ThreadId-getEpochMilliSeconds)
+2. Add atomic increments.
 
 **include threads**
 ```
-M1 => T1 => M1-T1=${getEpocMilliseconds}
+M1 => T1 => M1-T1=${```javascript
+counter = loadFromFile();
+getId() {
+    // mutex
+    counter++; //atomic increment
+    saveCounterToFile();
+    // mutex
+    return concat(
+        machine_id,
+        counter
+    )
+}
+```}
 M1 => T1 => M1-T2-${getEpocMilliseconds}
 M2 => T1 => M2-T1-${getEpocMilliseconds}
 M2 => T1 => M2-T2-${getEpocMilliseconds}
 ```
 
-### Concating static counter
+### Concating static atomic counter
+
+Initially adding atomic counter.
+```javascript
+    counter = 0;
+    getId() {
+        counter++; //atomic increment
+        return concat(
+            machine_id,
+            getEpocMilliseconds,
+            counter
+        )
+    }
+```
+
+>**As, static atomic counter represents moving forward, there is no need to add time to the ID. Time/epoch is redundant. Making ID shorted. Lesser storage.**
+
+```javascript
+    counter = 0;
+    getId() {
+        counter++; //atomic increment
+        return concat(
+            machine_id,
+            counter
+        )
+    }
+```
+Example for machine: 
 
 **M1**
 ```
@@ -75,31 +136,45 @@ getId() {
     )
 }
 ```
-### Why Are Monotonic Increasing IDs Needed? 
+### But Why Are Monotonic Increasing IDs Needed? 
+### What's wrong with just using a simple counter (like above), and why do we need monotonic IDs?
 
-Earlier in this document, we discussed incrementing counters per machine to generate unique IDs. While this works for basic ID uniqueness, it can cause issues in distributed systems, especially when multiple machines are involved, and when data must be efficiently queried and indexed at scale.
+Using a simple counter **per machine**, even if each machine has a unique ID (e.g., `machine_id + counter`), solves the collision problem between machines. However, there are still important reasons why that's not enough in a distributed system and why we need IDs that are **monotonic (always increasing) across the whole system**:
 
-**Key Differences:**
+#### 1. **Global Order Is Lost**
+- If each machine generates its own counter-based IDs independently, **there is no guarantee of global (system-wide) temporal ordering**.
+- For example, `M1-3` could be created *after* `M2-10`, but numerically `M2-10` > `M1-3`. If you sort IDs, you don’t get the true chronological order of events.
+- This makes retrieving events “in order” across machines or sharded DBs impossible without extra metadata (like timestamps).
 
-- **Counter-only approach:**  
-  - IDs like `M1-c1`, `M2-c1034`, etc. only guarantee local (per-machine) increment but may not be globally ordered by creation time (since `M1-c3` and `M2-c2` could be generated in any order).
-  - With just counters and machine IDs, insertion order isn't reflected globally.
+#### 2. **Querying for Newest/Oldest Becomes Hard or Slow**
+- Inserting monotonically increasing IDs allows efficient “append-only” behavior in DB indexes (like B+ trees).
+- Without global monotonicity, inserts aren’t ordered. Querying for “latest N items” or range queries is slower and requires extra columns/indexes (e.g., a timestamp field).
+- Monotonic IDs naturally represent chronological order, simplifying these operations.
 
-- **Monotonic Increasing IDs (with timestamp + counter):**  
-  - Guarantee that each newer ID is *always* greater than any previous one, across all machines.
-  - Enable time-based ordering without a separate timestamp column.
-  - Make queries like "get newest records" or paginating with `WHERE id < last_id ORDER BY id DESC` extremely fast and consistent using a single B+ tree index.
-  - Ensure that even after restarts and counter resets, IDs keep increasing (since timestamp dominates).
+#### 3. **Sharding, Archiving, and Range Scans**
+- Systems often partition data by ID range or need to archive “the oldest data”.
+- With monotonic IDs, older data always has lower IDs, making these operations straightforward and efficient.
+- If machines are only incrementing local counters, ID ranges don’t correlate with time, breaking this property.
 
-**Summary Table:**
+#### 4. **Operational Simplification & Debugging**
+- Monotonic IDs make bugs or issues (such as delays, dropped data, or clock changes) easy to spot—jumps and gaps are obvious.
+- They're also easier for debugging, as you can reason about system progress by watching ID growth over time.
 
-| Approach         | Globally Ordered? | Fast Database Paging? | Resilience to Restarts? |
-|------------------|------------------|----------------------|-----------------------|
-| Counter+Machine  | ❌               | ❌                   | ⚠️ (manual handling)  |
-| Monotonic ID     | ✅               | ✅                   | ✅ (timestamp primary)|
+### Why do we need monotonic increasing IDs?
 
-**In short:**  
-Monotonic increasing IDs are **needed** for distributed systems because they provide both uniqueness *and* a global, time-sortable order, unlocking major performance and consistency advantages over local counter IDs.
+Monotonic IDs solve these problems by:
+- **Encoding time, machine, and counter** in the ID (e.g., Twitter's Snowflake: timestamp | machine_id | counter).
+- This creates a single, ever-increasing sequence **across the entire system**.
+
+#### Key properties:
+- **Globally unique**: Combining machine_id and counter ensures uniqueness (as you've pointed out, collisions are avoided this way).
+- **System-wide order**: IDs can be sorted, and you get true chronological order of creation, even with many machines.
+- **Efficient for DBs and queries**: Inserts append to the end and ranges/scans are fast.
+
+#### Takeaway
+
+> While using `machine_id + counter` avoids collisions, **global monotonicity is the missing ingredient**. Monotonic increasing IDs enable efficient, ordered data storage, easier operations, and enable new use cases that unordered or partitioned counters cannot provide.
+
 
 ---
 
