@@ -301,23 +301,6 @@ Deep dive into database concepts and design:
 
 ---
 
-### Week 4: Service Design & Advanced Patterns
-
-#### Day 1: Hashtag Service
-**Topics:**
-
-1. **Hashtag Service Design**
-   - High-write, high-read workloads
-   - Real-time trending algorithms
-   - Time-series data management
-   - Count aggregation at scale
-   - (Notes in progress)
-
-**Key Learnings:**
-- (In progress)
-
----
-
 ## 🎯 Learning Methodology
 
 This repository follows a structured approach:
@@ -366,5 +349,3 @@ Each note typically includes:
 - **Key Learnings** - Summary of important concepts
 
 ---
-
-*Last Updated: Week 4 Day 1 - November 2025*
