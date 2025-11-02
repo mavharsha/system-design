@@ -1,0 +1,3 @@
+
+- Consistent hashing
+- Operational complexity
