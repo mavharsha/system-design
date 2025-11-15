@@ -100,3 +100,61 @@
    - Better than LIKE '%keyword%' which doesn't use regular indexes
    - Supports stemming, relevance ranking, natural language search
    - Alternative: Use dedicated search engines (Elasticsearch) for complex needs
+
+
+### Dense vs Sparse Indexes
+
+**Index structures** fall into two main types: **dense** and **sparse**. Understanding when to use each is essential for tuning performance and storage.
+
+#### 1. **Dense Index**
+- Has an index entry for **every row** in the table (duplicates included).
+- **Use cases:** Needed for uniqueness enforcement and very fast lookups.
+- **Pros:**
+  - Fast point queries (`SELECT ... WHERE id = ...`)
+  - Enforces unique constraints efficiently
+- **Cons:**
+  - Larger index size (can affect writes and disk usage)
+  - More updates on data changes
+
+#### 2. **Sparse Index**
+- Only adds index entries for **some rows**—usually the first row of each disk block or a group (common with physically sorted/clustered tables).
+- **Use cases:** Range scans, big tables where only some data is frequently queried.
+- **Pros:**
+  - Smaller and faster index scans
+  - Fewer updates when table changes
+- **Cons:**
+  - Slower for point lookups unless data is well-clustered
+  - Cannot enforce row-level uniqueness
+
+---
+
+#### PostgreSQL Example
+
+- **Default**: All standard PostgreSQL indexes (B-tree, hash, GIN, GiST) are **dense**—every matching row is indexed.
+- **Clustered table:** Using `CLUSTER` physically arranges data on disk but still uses a dense B-tree index.
+- **Partial indexes** (with `WHERE` conditions): Behave somewhat like sparse; only rows matching the condition are indexed, helping reduce index size for large tables.
+
+**Example:**
+```sql
+-- Dense index (default in Postgres)
+CREATE INDEX idx_users_email ON users(email);
+
+-- Partial index = "sparse" on filtered rows
+CREATE INDEX idx_active_users ON users(email) WHERE status = 'active';
+```
+
+---
+
+#### When to Use Dense vs Sparse/Partial
+
+|                        | **Dense Index**                                      | **Sparse/Partial Index**                      |
+|------------------------|------------------------------------------------------|-----------------------------------------------|
+| **Best for**           | Fast lookups, uniqueness, random access              | Range scans, queries on subsets               |
+| **In PostgreSQL**      | All regular indexes are dense                        | Partial indexes approximate sparse indexes    |
+| **Choose if…**         | You frequently query or validate all rows            | You only care about a subset (e.g., status)   |
+
+**Key Points:**
+- **PostgreSQL:** Dense by default; use partial indexes for subset queries to save space.
+- **Sparse indexes:** Common in NoSQL/clustered storage, not typical in Postgres.
+- For big tables with lots of unneeded rows, partial indexes can deliver many of the benefits of sparsity.
+
