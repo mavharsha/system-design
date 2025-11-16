@@ -1,0 +1,13 @@
+{
+  "name": "interactive-mind-map",
+  "version": "1.0.0",
+  "description": "Interactive System Design Mind Map",
+  "scripts": {
+    "start": "npx http-server -p 8888 -o interactive-mind-map.html",
+    "serve": "npx http-server -p 8888"
+  },
+  "keywords": ["mindmap", "system-design"],
+  "author": "",
+  "license": "MIT"
+}
+

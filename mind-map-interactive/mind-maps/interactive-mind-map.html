@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Mind Maps</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow: hidden;
+            background: #f5f5f7;
+        }
+        .nav-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: #ffffff;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 10000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .nav-bar h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-right: 30px;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .nav-button {
+            padding: 10px 24px;
+            border: 2px solid #007AFF;
+            background: white;
+            color: #007AFF;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            min-width: 80px;
+        }
+        .nav-button:hover {
+            background: #007AFF;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+        }
+        .nav-button.active {
+            background: #007AFF;
+            color: white;
+        }
+        #mindmap {
+            width: 100vw;
+            height: calc(100vh - 60px);
+            margin-top: 60px;
+            background: radial-gradient(ellipse at center, #ffffff 0%, #f5f5f7 100%);
+            position: relative;
+            z-index: 1;
+        }
+        .controls {
+            position: absolute;
+            top: 80px;
+            left: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        .controls h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #333;
+        }
+        .controls button {
+            margin: 3px;
+            padding: 10px 16px;
+            border: none;
+            background: #007AFF;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .controls button:hover {
+            background: #005ECB;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+        }
+        .controls button:active {
+            transform: translateY(0);
+        }
+        .controls .button-group {
+            margin-bottom: 10px;
+        }
+        .controls .secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        .controls .secondary:hover {
+            background: #d0d0d0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .info {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: #666;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 16px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        .search-box {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        .search-box input {
+            padding: 10px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 250px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-box input:focus {
+            border-color: #007AFF;
+        }
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #666;
+        }
+        .loading .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007AFF;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Custom node styling */
+        .markmap-node circle {
+            transition: all 0.3s ease;
+        }
+        .markmap-node:hover circle {
+            stroke-width: 3px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        .markmap-node text {
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .markmap-node:hover text {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-bar">
+        <h1>📚 Interactive Mind Maps</h1>
+    </div>
+    
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Loading mind map...</p>
+    </div>
+    
+    <div class="controls">
+        <h3>🗺️ Navigation</h3>
+        <div class="nav-buttons">
+            <button class="nav-button active" id="nav-home" data-route="home">🏠 Home</button>
+            <button class="nav-button" id="nav-java" data-route="java">☕ Java</button>
+            <button class="nav-button" id="nav-course" data-route="course">📚 Course</button>
+        </div>
+        <div class="button-group">
+            <button id="zoom-in">🔍 Zoom In</button>
+            <button id="zoom-out">🔍 Zoom Out</button>
+            <button id="fit">📐 Fit Screen</button>
+        </div>
+        <div class="button-group">
+            <button id="expand-all" class="secondary">➕ Expand All</button>
+            <button id="collapse-all" class="secondary">➖ Collapse All</button>
+            <button id="reset" class="secondary">🔄 Reset View</button>
+        </div>
+    </div>
+    
+    <div class="search-box">
+        <input type="text" id="search" placeholder="🔍 Search nodes..." />
+    </div>
+    
+    <div class="info">
+        <strong>Controls:</strong> Click to expand/collapse | Drag to pan | Scroll to zoom | Use search to find topics
+    </div>
+    
+    <svg id="mindmap"></svg>
+
+    <script src="https://unpkg.com/d3@7"></script>
+    <script src="https://unpkg.com/markmap-lib@0.15.3/dist/browser/index.js"></script>
+    <script src="https://unpkg.com/markmap-view@0.15.3/dist/browser/index.js"></script>
+    
+    <script>
+        let markmap;
+        let originalRoot;
+        let currentRoute = 'home';
+        
+        // Mind map configurations
+        const mindMaps = {
+            home: {
+                file: 'mind-maps/interactive-mind-map.md',
+                title: 'System Design Mind Map',
+                colors: [
+                    '#FF6B6B', // Coral red for root
+                    '#4ECDC4', // Teal for main categories
+                    '#45B7D1', // Sky blue for subcategories
+                    '#FED766', // Yellow for sub-subcategories
+                    '#8E7CC3', // Purple for deeper levels
+                    '#4A90E2', // Blue
+                    '#7CB342', // Green
+                    '#FF8A65'  // Orange
+                ]
+            },
+            java: {
+                file: 'mind-maps/java-mind-map.md',
+                title: 'Java: From Basics to Pro',
+                colors: [
+                    '#ED8B00', // Java orange for root
+                    '#5382A1', // Java blue for main categories
+                    '#F89820', // Java orange variant
+                    '#4A90E2', // Sky blue
+                    '#7CB342', // Green
+                    '#8E7CC3', // Purple
+                    '#FF6B6B', // Coral red
+                    '#4ECDC4'  // Teal
+                ]
+            },
+            course: {
+                file: 'mind-maps/system-design-course-mind-map.md',
+                title: 'System Design Course: Week by Week',
+                colors: [
+                    '#9B59B6', // Purple for root
+                    '#3498DB', // Blue for weeks
+                    '#E74C3C', // Red for topics
+                    '#2ECC71', // Green for subtopics
+                    '#F39C12', // Orange
+                    '#1ABC9C', // Turquoise
+                    '#E67E22', // Dark orange
+                    '#34495E'  // Dark blue-gray
+                ]
+            }
+        };
+        
+        // Load mind map based on route
+        function loadMindMap(route) {
+            const config = mindMaps[route];
+            if (!config) {
+                console.error('Unknown route:', route);
+                return;
+            }
+            
+            currentRoute = route;
+            document.getElementById('loading').style.display = 'block';
+            
+            // Update active nav button
+            document.querySelectorAll('.nav-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(`nav-${route}`).classList.add('active');
+            
+            // Update title
+            document.querySelector('.nav-bar h1').textContent = `📚 ${config.title}`;
+            
+            // Load the markdown content
+            fetch(config.file)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Failed to load ${config.file}`);
+                    }
+                    return response.text();
+                })
+                .then(markdown => {
+                    // Hide loading indicator
+                    document.getElementById('loading').style.display = 'none';
+                    
+                    // Create markmap
+                    const { Markmap, loadCSS, loadJS } = window.markmap;
+                    
+                    // Transform markdown to markmap data
+                    const { Transformer } = window.markmap;
+                    const transformer = new Transformer();
+                    const { root, features } = transformer.transform(markdown);
+                    originalRoot = JSON.parse(JSON.stringify(root)); // Deep copy for reset
+                    
+                    // Destroy existing markmap if it exists
+                    if (markmap) {
+                        markmap.destroy();
+                    }
+                    
+                    // Create markmap instance with enhanced options
+                    markmap = Markmap.create('#mindmap', {
+                        duration: 300,
+                        nodeMinHeight: 20,
+                        paddingX: 12,
+                        scrollForPan: true,
+                        fitRatio: 0.95,
+                        autoFit: true,
+                        nodeFont: '14px sans-serif',
+                        color: (node) => {
+                            // Use route-specific color scheme
+                            return config.colors[node.depth % config.colors.length];
+                        }
+                    }, root);
+                    
+                    // Load any required assets
+                    if (features.styles) loadCSS(features.styles);
+                    if (features.scripts) loadJS(features.scripts, { getMarkmap: () => markmap });
+                    
+                    setupControls();
+                })
+                .catch(error => {
+                    console.error('Error loading markdown:', error);
+                    document.getElementById('loading').innerHTML = `<div style="color: red;">Error loading mind map data. Make sure ${config.file} is in the same directory.</div>`;
+                });
+        }
+        
+        // Helper function to traverse and modify nodes
+        function traverseNodes(node, callback) {
+            callback(node);
+            if (node.children) {
+                node.children.forEach(child => traverseNodes(child, callback));
+            }
+        }
+        
+        // Setup all controls and event listeners
+        function setupControls() {
+            // Remove existing listeners by cloning and replacing
+            const zoomInBtn = document.getElementById('zoom-in');
+            const zoomOutBtn = document.getElementById('zoom-out');
+            const fitBtn = document.getElementById('fit');
+            const expandAllBtn = document.getElementById('expand-all');
+            const collapseAllBtn = document.getElementById('collapse-all');
+            const resetBtn = document.getElementById('reset');
+            const searchInput = document.getElementById('search');
+            
+            // Clear search on route change
+            searchInput.value = '';
+            
+            // Zoom controls - simulate wheel events to use markmap's existing zoom
+            zoomInBtn.onclick = (e) => {
+                e.preventDefault();
+                if (!markmap) return;
+                const svg = document.getElementById('mindmap');
+                if (!svg) return;
+                
+                // Simulate wheel event for zoom in
+                const rect = svg.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                const wheelEvent = new WheelEvent('wheel', {
+                    clientX: centerX,
+                    clientY: centerY,
+                    deltaY: -100, // Negative for zoom in
+                    deltaMode: WheelEvent.DOM_DELTA_PIXEL,
+                    bubbles: true,
+                    cancelable: true
+                });
+                svg.dispatchEvent(wheelEvent);
+            };
+            
+            zoomOutBtn.onclick = (e) => {
+                e.preventDefault();
+                if (!markmap) return;
+                const svg = document.getElementById('mindmap');
+                if (!svg) return;
+                
+                // Simulate wheel event for zoom out
+                const rect = svg.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                const wheelEvent = new WheelEvent('wheel', {
+                    clientX: centerX,
+                    clientY: centerY,
+                    deltaY: 100, // Positive for zoom out
+                    deltaMode: WheelEvent.DOM_DELTA_PIXEL,
+                    bubbles: true,
+                    cancelable: true
+                });
+                svg.dispatchEvent(wheelEvent);
+            };
+            
+            fitBtn.onclick = () => {
+                if (!markmap) return;
+                markmap.fit();
+            };
+            
+            expandAllBtn.onclick = () => {
+                const currentRoot = markmap.state.data;
+                traverseNodes(currentRoot, node => {
+                    if (node.children && node.children.length > 0) {
+                        node.payload = { ...node.payload, fold: false };
+                    }
+                });
+                markmap.setData(currentRoot);
+            };
+            
+            collapseAllBtn.onclick = () => {
+                const currentRoot = markmap.state.data;
+                traverseNodes(currentRoot, node => {
+                    if (node.children && node.children.length > 0 && node.depth > 0) {
+                        node.payload = { ...node.payload, fold: true };
+                    }
+                });
+                markmap.setData(currentRoot);
+            };
+            
+            resetBtn.onclick = () => {
+                // Reset to original state
+                const resetRoot = JSON.parse(JSON.stringify(originalRoot));
+                markmap.setData(resetRoot);
+                markmap.fit();
+            };
+            
+            // Search functionality
+            let searchTimeout;
+            searchInput.oninput = (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    const currentRoot = markmap.state.data;
+                    
+                    if (searchTerm === '') {
+                        // Reset all nodes to normal
+                        traverseNodes(currentRoot, node => {
+                            delete node.payload.highlight;
+                        });
+                    } else {
+                        // Search and highlight matching nodes
+                        traverseNodes(currentRoot, node => {
+                            const content = node.content.toLowerCase();
+                            if (content.includes(searchTerm)) {
+                                // Highlight matching node
+                                node.payload = { ...node.payload, highlight: true };
+                                // Expand path to this node
+                                let parent = node;
+                                while (parent) {
+                                    if (parent.payload) {
+                                        parent.payload.fold = false;
+                                    }
+                                    parent = parent.parent;
+                                }
+                            } else {
+                                delete node.payload.highlight;
+                            }
+                        });
+                    }
+                    markmap.setData(currentRoot);
+                }, 300);
+            };
+        }
+        
+        // Setup navigation using event delegation (works even if buttons are recreated)
+        document.addEventListener('click', (e) => {
+            const target = e.target;
+            // Check if click is on a nav button or inside one
+            const navButton = target.closest('.nav-button');
+            if (navButton) {
+                e.preventDefault();
+                e.stopPropagation();
+                const buttonId = navButton.id;
+                console.log('Navigation button clicked:', buttonId, 'current route:', currentRoute);
+                
+                if (buttonId === 'nav-home' && currentRoute !== 'home') {
+                    loadMindMap('home');
+                } else if (buttonId === 'nav-java' && currentRoute !== 'java') {
+                    loadMindMap('java');
+                } else if (buttonId === 'nav-course' && currentRoute !== 'course') {
+                    loadMindMap('course');
+                }
+            }
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ignore if typing in search box
+            if (e.target.id === 'search') return;
+            
+            if (e.key === '+' || e.key === '=') {
+                e.preventDefault();
+                if (markmap) {
+                    const svg = document.getElementById('mindmap');
+                    if (svg) {
+                        const rect = svg.getBoundingClientRect();
+                        const centerX = rect.left + rect.width / 2;
+                        const centerY = rect.top + rect.height / 2;
+                        const wheelEvent = new WheelEvent('wheel', {
+                            clientX: centerX,
+                            clientY: centerY,
+                            deltaY: -100,
+                            deltaMode: WheelEvent.DOM_DELTA_PIXEL,
+                            bubbles: true,
+                            cancelable: true
+                        });
+                        svg.dispatchEvent(wheelEvent);
+                    }
+                }
+            } else if (e.key === '-' || e.key === '_') {
+                e.preventDefault();
+                if (markmap) {
+                    const svg = document.getElementById('mindmap');
+                    if (svg) {
+                        const rect = svg.getBoundingClientRect();
+                        const centerX = rect.left + rect.width / 2;
+                        const centerY = rect.top + rect.height / 2;
+                        const wheelEvent = new WheelEvent('wheel', {
+                            clientX: centerX,
+                            clientY: centerY,
+                            deltaY: 100,
+                            deltaMode: WheelEvent.DOM_DELTA_PIXEL,
+                            bubbles: true,
+                            cancelable: true
+                        });
+                        svg.dispatchEvent(wheelEvent);
+                    }
+                }
+            } else if (e.key === '0') {
+                if (markmap) markmap.fit();
+            } else if (e.key === 'f' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                document.getElementById('search').focus();
+            }
+        });
+        
+        // Touch gesture support for mobile
+        let touchStartDistance = 0;
+        document.getElementById('mindmap').addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                touchStartDistance = Math.sqrt(dx * dx + dy * dy);
+            }
+        });
+        
+        document.getElementById('mindmap').addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2 && markmap) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const scale = distance / touchStartDistance;
+                if (scale > 0.5 && scale < 2) {
+                    const svg = d3.select('#mindmap');
+                    const currentTransform = d3.zoomTransform(svg.node());
+                    const newScale = currentTransform.k * scale;
+                    svg.call(d3.zoom().scaleTo, newScale);
+                    touchStartDistance = distance;
+                }
+            }
+        });
+        
+        // Load initial mind map
+        loadMindMap('home');
+    </script>
+</body>
+</html>
