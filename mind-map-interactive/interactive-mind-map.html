@@ -202,6 +202,7 @@
         <div class="nav-buttons">
             <button class="nav-button active" id="nav-home" data-route="home">🏠 Home</button>
             <button class="nav-button" id="nav-java" data-route="java">☕ Java</button>
+            <button class="nav-button" id="nav-java-questions" data-route="java-questions">❓ Java Q&A</button>
             <button class="nav-button" id="nav-course" data-route="course">📚 Course</button>
         </div>
         <div class="button-group">
@@ -263,6 +264,20 @@
                     '#8E7CC3', // Purple
                     '#FF6B6B', // Coral red
                     '#4ECDC4'  // Teal
+                ]
+            },
+            'java-questions': {
+                file: 'mind-maps/java-interview-questions.md',
+                title: 'Java Interview Questions',
+                colors: [
+                    '#E74C3C', // Red for root
+                    '#3498DB', // Blue for main categories
+                    '#2ECC71', // Green for subcategories
+                    '#F39C12', // Orange
+                    '#9B59B6', // Purple
+                    '#1ABC9C', // Turquoise
+                    '#E67E22', // Dark orange
+                    '#34495E'  // Dark blue-gray
                 ]
             },
             course: {
@@ -506,6 +521,8 @@
                     loadMindMap('home');
                 } else if (buttonId === 'nav-java' && currentRoute !== 'java') {
                     loadMindMap('java');
+                } else if (buttonId === 'nav-java-questions' && currentRoute !== 'java-questions') {
+                    loadMindMap('java-questions');
                 } else if (buttonId === 'nav-course' && currentRoute !== 'course') {
                     loadMindMap('course');
                 }

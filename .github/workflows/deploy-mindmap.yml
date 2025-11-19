@@ -1,0 +1,55 @@
+name: Deploy Interactive Mindmap to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'mind-map-interactive/**'
+  workflow_dispatch: # Allows manual triggering
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Prepare deployment files
+        run: |
+          # Create deployment directory
+          mkdir -p _site
+          
+          # Copy HTML file to root
+          cp mind-map-interactive/interactive-mind-map.html _site/index.html
+          
+          # Copy mind-maps directory
+          cp -r mind-map-interactive/mind-maps _site/mind-maps
+          
+          # Optional: Copy README if you want it accessible
+          # cp mind-map-interactive/INTERACTIVE_MINDMAP_README.md _site/README.md
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
