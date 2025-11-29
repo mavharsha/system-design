@@ -424,6 +424,144 @@
             }
         };
         
+        // Helper function to traverse and modify nodes
+        function traverseNodes(node, callback) {
+            callback(node);
+            if (node.children) {
+                node.children.forEach(child => traverseNodes(child, callback));
+            }
+        }
+        
+        // Setup all controls and event listeners
+        function setupControls() {
+            const fitBtn = document.getElementById('fit');
+            const expandAllBtn = document.getElementById('expand-all');
+            const collapseAllBtn = document.getElementById('collapse-all');
+            const resetBtn = document.getElementById('reset');
+            const searchInput = document.getElementById('search');
+            
+            // Clear search on route change
+            if (searchInput) searchInput.value = '';
+            
+            if (fitBtn) {
+                fitBtn.onclick = () => {
+                    if (!markmap) return;
+                    markmap.fit();
+                };
+            }
+            
+            if (expandAllBtn) {
+                expandAllBtn.onclick = () => {
+                    const currentRoot = markmap.state.data;
+                    traverseNodes(currentRoot, node => {
+                        if (node.children && node.children.length > 0) {
+                            node.payload = { ...node.payload, fold: false };
+                        }
+                    });
+                    markmap.setData(currentRoot);
+                    markmap.fit();
+                };
+            }
+            
+            if (collapseAllBtn) {
+                collapseAllBtn.onclick = () => {
+                    const currentRoot = markmap.state.data;
+                    traverseNodes(currentRoot, node => {
+                        if (node.children && node.children.length > 0 && node.depth > 0) {
+                            node.payload = { ...node.payload, fold: true };
+                        }
+                    });
+                    markmap.setData(currentRoot);
+                    markmap.fit();
+                };
+            }
+            
+            if (resetBtn) {
+                resetBtn.onclick = () => {
+                    const resetRoot = JSON.parse(JSON.stringify(originalRoot));
+                    markmap.setData(resetRoot);
+                    markmap.fit();
+                };
+            }
+            
+            // Search functionality
+            let searchTimeout;
+            if (searchInput) {
+                searchInput.oninput = (e) => {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        const searchTerm = e.target.value.toLowerCase();
+                        const currentRoot = markmap.state.data;
+                        
+                        if (searchTerm === '') {
+                            // Reset all nodes to normal
+                            traverseNodes(currentRoot, node => {
+                                delete node.payload.highlight;
+                            });
+                        } else {
+                            // Search and highlight matching nodes
+                            traverseNodes(currentRoot, node => {
+                                const content = node.content.toLowerCase();
+                                if (content.includes(searchTerm)) {
+                                    // Highlight matching node
+                                    node.payload = { ...node.payload, highlight: true };
+                                    // Expand path to this node
+                                    let parent = node;
+                                    while (parent) {
+                                        if (parent.payload) {
+                                            parent.payload.fold = false;
+                                        }
+                                        parent = parent.parent;
+                                    }
+                                } else {
+                                    delete node.payload.highlight;
+                                }
+                            });
+                        }
+                        markmap.setData(currentRoot);
+                    }, 300);
+                };
+            }
+        }
+
+        // Dropdown handling
+        function setupDropdowns() {
+            // Close dropdowns when clicking outside
+            window.addEventListener('click', (e) => {
+                if (!e.target.matches('.dropbtn')) {
+                    document.querySelectorAll('.dropdown-content').forEach(content => {
+                        if (content.classList.contains('show')) {
+                            content.classList.remove('show');
+                        }
+                    });
+                }
+            });
+
+            // Toggle dropdowns on click
+            document.querySelectorAll('.dropbtn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const content = btn.nextElementSibling;
+                    
+                    // Close other dropdowns
+                    document.querySelectorAll('.dropdown-content').forEach(c => {
+                        if (c !== content) c.classList.remove('show');
+                    });
+                    
+                    content.classList.toggle('show');
+                });
+            });
+
+            // Close dropdown when an option inside is clicked (using delegation)
+            document.querySelectorAll('.dropdown-content').forEach(content => {
+                content.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+                         content.classList.remove('show');
+                    }
+                });
+            });
+        }
+
         // Load mind map based on route
         function loadMindMap(route) {
             const config = mindMaps[route];
@@ -503,151 +641,13 @@
                     if (features.styles) loadCSS(features.styles);
                     if (features.scripts) loadJS(features.scripts, { getMarkmap: () => markmap });
                     
-                    setupControls();
-                    setupDropdowns();
+                    // Note: setupControls and setupDropdowns are now called ONCE at the end of the script
+                    // instead of every time loadMindMap is called, preventing listener destruction.
                 })
                 .catch(error => {
                     console.error('Error loading markdown:', error);
                     document.getElementById('loading').innerHTML = `<div style="color: red;">Error loading mind map data. Make sure ${config.file} is in the same directory.</div>`;
                 });
-        }
-        
-        // Helper function to traverse and modify nodes
-        function traverseNodes(node, callback) {
-            callback(node);
-            if (node.children) {
-                node.children.forEach(child => traverseNodes(child, callback));
-            }
-        }
-        
-        // Dropdown handling
-        function setupDropdowns() {
-            // Close dropdowns when clicking outside
-            window.addEventListener('click', (e) => {
-                if (!e.target.matches('.dropbtn')) {
-                    document.querySelectorAll('.dropdown-content').forEach(content => {
-                        if (content.classList.contains('show')) {
-                            content.classList.remove('show');
-                        }
-                    });
-                }
-            });
-
-            // Toggle dropdowns on click
-            document.querySelectorAll('.dropbtn').forEach(btn => {
-                // Remove old listener to avoid duplicates if setupDropdowns is called multiple times
-                const newBtn = btn.cloneNode(true);
-                btn.parentNode.replaceChild(newBtn, btn);
-                
-                newBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const content = newBtn.nextElementSibling;
-                    
-                    // Close other dropdowns
-                    document.querySelectorAll('.dropdown-content').forEach(c => {
-                        if (c !== content) c.classList.remove('show');
-                    });
-                    
-                    content.classList.toggle('show');
-                });
-            });
-
-            // Close dropdown when an option inside is clicked
-            document.querySelectorAll('.dropdown-content button').forEach(btn => {
-                const newBtn = btn.cloneNode(true);
-                btn.parentNode.replaceChild(newBtn, btn);
-
-                newBtn.addEventListener('click', (e) => {
-                    // Let the original click handler logic run (e.g., loading map or view option)
-                    // The event will bubble up, but we also want to explicitly close the dropdown
-                    const content = newBtn.closest('.dropdown-content');
-                    if (content) {
-                        content.classList.remove('show');
-                    }
-                });
-            });
-        }
-        
-        // Setup all controls and event listeners
-        function setupControls() {
-            // Remove existing listeners by cloning and replacing
-            const fitBtn = document.getElementById('fit');
-            const expandAllBtn = document.getElementById('expand-all');
-            const collapseAllBtn = document.getElementById('collapse-all');
-            const resetBtn = document.getElementById('reset');
-            const searchInput = document.getElementById('search');
-            
-            // Clear search on route change
-            searchInput.value = '';
-            
-            fitBtn.onclick = () => {
-                if (!markmap) return;
-                markmap.fit();
-            };
-            
-            expandAllBtn.onclick = () => {
-                const currentRoot = markmap.state.data;
-                traverseNodes(currentRoot, node => {
-                    if (node.children && node.children.length > 0) {
-                        node.payload = { ...node.payload, fold: false };
-                    }
-                });
-                markmap.setData(currentRoot);
-            };
-            
-            collapseAllBtn.onclick = () => {
-                const currentRoot = markmap.state.data;
-                traverseNodes(currentRoot, node => {
-                    if (node.children && node.children.length > 0 && node.depth > 0) {
-                        node.payload = { ...node.payload, fold: true };
-                    }
-                });
-                markmap.setData(currentRoot);
-            };
-            
-            resetBtn.onclick = () => {
-                // Reset to original state
-                const resetRoot = JSON.parse(JSON.stringify(originalRoot));
-                markmap.setData(resetRoot);
-                markmap.fit();
-            };
-            
-            // Search functionality
-            let searchTimeout;
-            searchInput.oninput = (e) => {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(() => {
-                    const searchTerm = e.target.value.toLowerCase();
-                    const currentRoot = markmap.state.data;
-                    
-                    if (searchTerm === '') {
-                        // Reset all nodes to normal
-                        traverseNodes(currentRoot, node => {
-                            delete node.payload.highlight;
-                        });
-                    } else {
-                        // Search and highlight matching nodes
-                        traverseNodes(currentRoot, node => {
-                            const content = node.content.toLowerCase();
-                            if (content.includes(searchTerm)) {
-                                // Highlight matching node
-                                node.payload = { ...node.payload, highlight: true };
-                                // Expand path to this node
-                                let parent = node;
-                                while (parent) {
-                                    if (parent.payload) {
-                                        parent.payload.fold = false;
-                                    }
-                                    parent = parent.parent;
-                                }
-                            } else {
-                                delete node.payload.highlight;
-                            }
-                        });
-                    }
-                    markmap.setData(currentRoot);
-                }, 300);
-            };
         }
         
         // Setup navigation using event delegation (works even if buttons are recreated)
@@ -656,14 +656,7 @@
             // Check if click is on a nav button or inside one
             const navButton = target.closest('.nav-button');
             if (navButton) {
-                // If it's inside a dropdown, let the click bubble so dropdown closes?
-                // Actually we just preventDefault, so we need to ensure the dropdown logic works.
-                // The dropdown logic is handled by the specific button listeners in setupDropdowns now.
-                // But navigation logic is here.
-                
                 e.preventDefault();
-                // Don't stop propagation completely if we want the document click listener to close other things,
-                // but our dropdown close logic handles it.
                 
                 const buttonId = navButton.id;
                 console.log('Navigation button clicked:', buttonId, 'current route:', currentRoute);
@@ -766,6 +759,10 @@
                 }
             }
         });
+        
+        // Initialize everything
+        setupControls();
+        setupDropdowns();
         
         // Load initial mind map
         loadMindMap('home');
