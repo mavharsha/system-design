@@ -5,12 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Mind Maps</title>
     <style>
+        :root {
+            --bg-color: #f5f5f7;
+            --text-color: #333333;
+            --nav-bg: #ffffff;
+            --nav-border: #e0e0e0;
+            --control-bg: rgba(255, 255, 255, 0.95);
+            --primary-color: #007AFF;
+            --mindmap-bg: radial-gradient(ellipse at center, #ffffff 0%, #f5f5f7 100%);
+            --button-text: #007AFF;
+            --button-bg: #ffffff;
+            --button-hover: #007AFF;
+            --button-hover-text: #ffffff;
+            --dropdown-bg: #ffffff;
+            --dropdown-shadow: rgba(0,0,0,0.2);
+            --info-bg: rgba(255, 255, 255, 0.95);
+            --info-color: #666;
+            --input-bg: #ffffff;
+            --input-border: #e0e0e0;
+            --input-color: #333;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #f0f0f0;
+            --nav-bg: #2d2d2d;
+            --nav-border: #404040;
+            --control-bg: rgba(45, 45, 45, 0.95);
+            --primary-color: #4a9eff;
+            --mindmap-bg: radial-gradient(ellipse at center, #2d2d2d 0%, #1a1a1a 100%);
+            --button-text: #4a9eff;
+            --button-bg: #2d2d2d;
+            --button-hover: #4a9eff;
+            --button-hover-text: #1a1a1a;
+            --dropdown-bg: #2d2d2d;
+            --dropdown-shadow: rgba(0,0,0,0.5);
+            --info-bg: rgba(45, 45, 45, 0.95);
+            --info-color: #bbb;
+            --input-bg: #2d2d2d;
+            --input-border: #404040;
+            --input-color: #f0f0f0;
+        }
+
         body {
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             overflow: hidden;
-            background: #f5f5f7;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: background 0.3s, color 0.3s;
         }
         .nav-bar {
             position: fixed;
@@ -18,136 +62,164 @@
             left: 0;
             right: 0;
             height: 60px;
-            background: #ffffff;
-            border-bottom: 2px solid #e0e0e0;
+            background: var(--nav-bg);
+            border-bottom: 2px solid var(--nav-border);
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 0 20px;
             z-index: 10000;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: background 0.3s, border-color 0.3s;
         }
         .nav-bar h1 {
             margin: 0;
             font-size: 20px;
             font-weight: 600;
-            color: #333;
-            margin-right: 30px;
+            color: var(--text-color);
         }
-        .nav-buttons {
+        .nav-right {
             display: flex;
-            gap: 10px;
+            align-items: center;
+            gap: 15px;
         }
-        .nav-button {
-            padding: 10px 24px;
-            border: 2px solid #007AFF;
-            background: white;
-            color: #007AFF;
-            border-radius: 6px;
+        .theme-toggle {
+            background: none;
+            border: 2px solid var(--nav-border);
+            color: var(--text-color);
             cursor: pointer;
-            font-size: 15px;
-            font-weight: 600;
+            font-size: 20px;
+            padding: 5px 10px;
+            border-radius: 6px;
             transition: all 0.2s ease;
-            min-width: 80px;
         }
-        .nav-button:hover {
-            background: #007AFF;
-            color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0,122,255,0.3);
-        }
-        .nav-button.active {
-            background: #007AFF;
-            color: white;
+        .theme-toggle:hover {
+            background-color: var(--bg-color);
         }
         #mindmap {
             width: 100vw;
             height: calc(100vh - 60px);
             margin-top: 60px;
-            background: radial-gradient(ellipse at center, #ffffff 0%, #f5f5f7 100%);
+            background: var(--mindmap-bg);
             position: relative;
             z-index: 1;
+            transition: background 0.3s;
         }
         .controls {
             position: absolute;
             top: 80px;
             left: 20px;
             z-index: 1000;
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--control-bg);
             padding: 15px;
             border-radius: 10px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             backdrop-filter: blur(10px);
+            transition: background 0.3s;
         }
         .controls h3 {
             margin: 0 0 10px 0;
             font-size: 16px;
-            color: #333;
+            color: var(--text-color);
         }
-        .controls button {
-            margin: 3px;
-            padding: 10px 16px;
-            border: none;
-            background: #007AFF;
+        
+        /* Dropdown styling */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        .dropbtn {
+            background-color: var(--primary-color);
             color: white;
-            border-radius: 6px;
-            cursor: pointer;
+            padding: 10px 16px;
             font-size: 14px;
             font-weight: 500;
-            transition: all 0.2s ease;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            width: 100%;
+            justify-content: space-between;
         }
-        .controls button:hover {
-            background: #005ECB;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--dropdown-bg);
+            min-width: 180px;
+            box-shadow: 0 8px 16px 0 var(--dropdown-shadow);
+            z-index: 1;
+            border-radius: 8px;
+            padding: 5px;
+            margin-top: 5px;
         }
-        .controls button:active {
-            transform: translateY(0);
+        
+        .dropdown-content button {
+            color: var(--text-color);
+            padding: 10px 16px;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            margin: 0;
+            border-radius: 4px;
+            cursor: pointer;
         }
-        .controls .button-group {
-            margin-bottom: 10px;
+        
+        .dropdown-content button:hover {
+            background-color: var(--bg-color);
+            color: var(--primary-color);
         }
-        .controls .secondary {
-            background: #e0e0e0;
-            color: #333;
+
+        /* Show class for click handling */
+        .dropdown-content.show {
+            display: block;
         }
-        .controls .secondary:hover {
-            background: #d0d0d0;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
+
         .info {
             position: absolute;
             bottom: 20px;
             left: 20px;
-            color: #666;
+            color: var(--info-color);
             font-size: 13px;
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--info-bg);
             padding: 10px 16px;
             border-radius: 8px;
             backdrop-filter: blur(10px);
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: background 0.3s, color 0.3s;
         }
         .search-box {
             position: absolute;
             top: 80px;
             right: 20px;
             z-index: 1000;
-            background: rgba(255, 255, 255, 0.95);
+            background: var(--control-bg);
             padding: 15px;
             border-radius: 10px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             backdrop-filter: blur(10px);
+            transition: background 0.3s;
         }
         .search-box input {
             padding: 10px 16px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--input-color);
             border-radius: 6px;
             font-size: 14px;
             width: 250px;
             outline: none;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, background 0.3s, color 0.3s;
         }
         .search-box input:focus {
-            border-color: #007AFF;
+            border-color: var(--primary-color);
         }
         .loading {
             position: fixed;
@@ -155,11 +227,11 @@
             left: 50%;
             transform: translate(-50%, -50%);
             text-align: center;
-            color: #666;
+            color: var(--info-color);
         }
         .loading .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #007AFF;
+            border: 3px solid var(--nav-border);
+            border-top: 3px solid var(--primary-color);
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -181,6 +253,7 @@
         .markmap-node text {
             font-size: 14px;
             transition: all 0.3s ease;
+            fill: var(--text-color);
         }
         .markmap-node:hover text {
             font-weight: 600;
@@ -190,6 +263,9 @@
 <body>
     <div class="nav-bar">
         <h1>📚 Interactive Mind Maps</h1>
+        <div class="nav-right">
+            <button class="theme-toggle" id="theme-toggle" title="Toggle Dark/Light Mode">🌓</button>
+        </div>
     </div>
     
     <div class="loading" id="loading">
@@ -199,22 +275,26 @@
     
     <div class="controls">
         <h3>🗺️ Navigation</h3>
-        <div class="nav-buttons">
-            <button class="nav-button active" id="nav-home" data-route="home">🏠 Home</button>
-            <button class="nav-button" id="nav-java" data-route="java">☕ Java</button>
-            <button class="nav-button" id="nav-java-questions" data-route="java-questions">❓ Java Q&A</button>
-            <button class="nav-button" id="nav-angular" data-route="angular">🅰️ Angular</button>
-            <button class="nav-button" id="nav-course" data-route="course">📚 Course</button>
+        <div class="dropdown">
+            <button class="dropbtn" id="current-map-btn">Select Mind Map ▼</button>
+            <div class="dropdown-content">
+                <button class="nav-button" id="nav-home" data-route="home">🏠 Home</button>
+                <button class="nav-button" id="nav-java" data-route="java">☕ Java</button>
+                <button class="nav-button" id="nav-java-questions" data-route="java-questions">❓ Java Q&A</button>
+                <button class="nav-button" id="nav-angular" data-route="angular">🅰️ Angular</button>
+                <button class="nav-button" id="nav-angular-questions" data-route="angular-questions">❓ Angular Q&A</button>
+                <button class="nav-button" id="nav-course" data-route="course">📚 Course</button>
+            </div>
         </div>
-        <div class="button-group">
-            <button id="zoom-in">🔍 Zoom In</button>
-            <button id="zoom-out">🔍 Zoom Out</button>
-            <button id="fit">📐 Fit Screen</button>
-        </div>
-        <div class="button-group">
-            <button id="expand-all" class="secondary">➕ Expand All</button>
-            <button id="collapse-all" class="secondary">➖ Collapse All</button>
-            <button id="reset" class="secondary">🔄 Reset View</button>
+        
+        <div class="dropdown">
+            <button class="dropbtn">⚙️ View Options ▼</button>
+            <div class="dropdown-content">
+                <button id="fit">📐 Fit Screen</button>
+                <button id="expand-all">➕ Expand All</button>
+                <button id="collapse-all">➖ Collapse All</button>
+                <button id="reset">🔄 Reset View</button>
+            </div>
         </div>
     </div>
     
@@ -237,6 +317,25 @@
         let originalRoot;
         let currentRoute = 'home';
         
+        // Theme handling
+        const themeToggle = document.getElementById('theme-toggle');
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Reload mindmap to apply theme colors if necessary (mainly for text color if handled by SVG)
+            // But we're using CSS variables for fill, so we might just need to trigger a style update
+            if (markmap) {
+                // Update text color
+                d3.selectAll('.markmap-node text').style('fill', newTheme === 'dark' ? '#f0f0f0' : '#333333');
+            }
+        });
+
         // Mind map configurations
         const mindMaps = {
             home: {
@@ -295,6 +394,20 @@
                     '#5D4037'  // Brown
                 ]
             },
+            'angular-questions': {
+                file: 'mind-maps/angular-interview-questions.md',
+                title: 'Angular Interview Questions',
+                colors: [
+                    '#C3002F', // Angular Red
+                    '#FF5722', // Deep Orange
+                    '#FF9800', // Orange
+                    '#FFC107', // Amber
+                    '#CDDC39', // Lime
+                    '#4CAF50', // Green
+                    '#009688', // Teal
+                    '#607D8B'  // Blue Grey
+                ]
+            },
             course: {
                 file: 'mind-maps/system-design-course-mind-map.md',
                 title: 'System Design Course: Week by Week',
@@ -322,11 +435,11 @@
             currentRoute = route;
             document.getElementById('loading').style.display = 'block';
             
-            // Update active nav button
-            document.querySelectorAll('.nav-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.getElementById(`nav-${route}`).classList.add('active');
+            // Update active nav button text
+            const currentBtn = document.getElementById(`nav-${route}`);
+            if (currentBtn) {
+                 document.getElementById('current-map-btn').textContent = currentBtn.textContent + ' ▼';
+            }
             
             // Update title
             document.querySelector('.nav-bar h1').textContent = `📚 ${config.title}`;
@@ -350,6 +463,14 @@
                     const { Transformer } = window.markmap;
                     const transformer = new Transformer();
                     const { root, features } = transformer.transform(markdown);
+                    
+                    // Collapse nodes by default (everything except root)
+                    traverseNodes(root, node => {
+                        if (node.children && node.children.length > 0 && node.depth > 0) {
+                            node.payload = { ...node.payload, fold: true };
+                        }
+                    });
+
                     originalRoot = JSON.parse(JSON.stringify(root)); // Deep copy for reset
                     
                     // Destroy existing markmap if it exists
@@ -361,9 +482,9 @@
                     markmap = Markmap.create('#mindmap', {
                         duration: 300,
                         nodeMinHeight: 20,
-                        paddingX: 12,
+                        paddingX: 30, // Increased horizontal padding
                         scrollForPan: true,
-                        fitRatio: 0.95,
+                        fitRatio: 0.8, // Reduced ratio for more breathing room
                         autoFit: true,
                         nodeFont: '14px sans-serif',
                         color: (node) => {
@@ -372,11 +493,18 @@
                         }
                     }, root);
                     
+                    // Apply current theme to new map
+                    const currentTheme = document.documentElement.getAttribute('data-theme');
+                    if (currentTheme === 'dark') {
+                        d3.selectAll('.markmap-node text').style('fill', '#f0f0f0');
+                    }
+                    
                     // Load any required assets
                     if (features.styles) loadCSS(features.styles);
                     if (features.scripts) loadJS(features.scripts, { getMarkmap: () => markmap });
                     
                     setupControls();
+                    setupDropdowns();
                 })
                 .catch(error => {
                     console.error('Error loading markdown:', error);
@@ -392,11 +520,57 @@
             }
         }
         
+        // Dropdown handling
+        function setupDropdowns() {
+            // Close dropdowns when clicking outside
+            window.addEventListener('click', (e) => {
+                if (!e.target.matches('.dropbtn')) {
+                    document.querySelectorAll('.dropdown-content').forEach(content => {
+                        if (content.classList.contains('show')) {
+                            content.classList.remove('show');
+                        }
+                    });
+                }
+            });
+
+            // Toggle dropdowns on click
+            document.querySelectorAll('.dropbtn').forEach(btn => {
+                // Remove old listener to avoid duplicates if setupDropdowns is called multiple times
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+                
+                newBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const content = newBtn.nextElementSibling;
+                    
+                    // Close other dropdowns
+                    document.querySelectorAll('.dropdown-content').forEach(c => {
+                        if (c !== content) c.classList.remove('show');
+                    });
+                    
+                    content.classList.toggle('show');
+                });
+            });
+
+            // Close dropdown when an option inside is clicked
+            document.querySelectorAll('.dropdown-content button').forEach(btn => {
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+
+                newBtn.addEventListener('click', (e) => {
+                    // Let the original click handler logic run (e.g., loading map or view option)
+                    // The event will bubble up, but we also want to explicitly close the dropdown
+                    const content = newBtn.closest('.dropdown-content');
+                    if (content) {
+                        content.classList.remove('show');
+                    }
+                });
+            });
+        }
+        
         // Setup all controls and event listeners
         function setupControls() {
             // Remove existing listeners by cloning and replacing
-            const zoomInBtn = document.getElementById('zoom-in');
-            const zoomOutBtn = document.getElementById('zoom-out');
             const fitBtn = document.getElementById('fit');
             const expandAllBtn = document.getElementById('expand-all');
             const collapseAllBtn = document.getElementById('collapse-all');
@@ -405,51 +579,6 @@
             
             // Clear search on route change
             searchInput.value = '';
-            
-            // Zoom controls - simulate wheel events to use markmap's existing zoom
-            zoomInBtn.onclick = (e) => {
-                e.preventDefault();
-                if (!markmap) return;
-                const svg = document.getElementById('mindmap');
-                if (!svg) return;
-                
-                // Simulate wheel event for zoom in
-                const rect = svg.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                
-                const wheelEvent = new WheelEvent('wheel', {
-                    clientX: centerX,
-                    clientY: centerY,
-                    deltaY: -100, // Negative for zoom in
-                    deltaMode: WheelEvent.DOM_DELTA_PIXEL,
-                    bubbles: true,
-                    cancelable: true
-                });
-                svg.dispatchEvent(wheelEvent);
-            };
-            
-            zoomOutBtn.onclick = (e) => {
-                e.preventDefault();
-                if (!markmap) return;
-                const svg = document.getElementById('mindmap');
-                if (!svg) return;
-                
-                // Simulate wheel event for zoom out
-                const rect = svg.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                
-                const wheelEvent = new WheelEvent('wheel', {
-                    clientX: centerX,
-                    clientY: centerY,
-                    deltaY: 100, // Positive for zoom out
-                    deltaMode: WheelEvent.DOM_DELTA_PIXEL,
-                    bubbles: true,
-                    cancelable: true
-                });
-                svg.dispatchEvent(wheelEvent);
-            };
             
             fitBtn.onclick = () => {
                 if (!markmap) return;
@@ -527,8 +656,15 @@
             // Check if click is on a nav button or inside one
             const navButton = target.closest('.nav-button');
             if (navButton) {
+                // If it's inside a dropdown, let the click bubble so dropdown closes?
+                // Actually we just preventDefault, so we need to ensure the dropdown logic works.
+                // The dropdown logic is handled by the specific button listeners in setupDropdowns now.
+                // But navigation logic is here.
+                
                 e.preventDefault();
-                e.stopPropagation();
+                // Don't stop propagation completely if we want the document click listener to close other things,
+                // but our dropdown close logic handles it.
+                
                 const buttonId = navButton.id;
                 console.log('Navigation button clicked:', buttonId, 'current route:', currentRoute);
                 
@@ -540,8 +676,16 @@
                     loadMindMap('java-questions');
                 } else if (buttonId === 'nav-angular' && currentRoute !== 'angular') {
                     loadMindMap('angular');
+                } else if (buttonId === 'nav-angular-questions' && currentRoute !== 'angular-questions') {
+                    loadMindMap('angular-questions');
                 } else if (buttonId === 'nav-course' && currentRoute !== 'course') {
                     loadMindMap('course');
+                }
+                
+                // Explicitly close dropdown if the button was inside one
+                const dropdownContent = navButton.closest('.dropdown-content');
+                if (dropdownContent) {
+                    dropdownContent.classList.remove('show');
                 }
             }
         });

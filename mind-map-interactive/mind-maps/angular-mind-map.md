@@ -3,6 +3,15 @@
 ## Core Concepts
 ### Architecture
 - Modules (NgModule)
+  - Declarations
+  - Imports
+  - Exports
+  - Providers
+  - Bootstrap
+- Standalone Components (v14+)
+  - No NgModule required
+  - Imports directly in component
+  - Bootstrapped via bootstrapApplication
 - Components
 - Templates
 - Metadata
@@ -34,6 +43,30 @@
   - Built-in (Date, UpperCase, LowerCase, Currency, etc.)
   - Pure vs Impure
   - Custom Pipes
+- **Custom Components**
+  - @Input() / @Output()
+  - Content Projection (ng-content)
+  - ViewChild / ContentChild
+  - HostBinding / HostListener
+  - Styles encapsulation (Emulated, ShadowDom, None)
+
+### Signals (v16+)
+- **Writable Signals**
+  - signal()
+  - set()
+  - update()
+  - mutate() (deprecated/removed in favor of update)
+- **Computed Signals**
+  - computed()
+  - Memoized
+  - Auto-dependency tracking
+- **Effects**
+  - effect()
+  - Side effects (logging, manual DOM sync)
+  - Injection context required
+- **RxJS Interop**
+  - toSignal()
+  - toObservable()
 
 ### Dependency Injection
 - Providers (useClass, useValue, useFactory, useExisting)
