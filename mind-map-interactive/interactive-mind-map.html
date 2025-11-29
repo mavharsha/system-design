@@ -203,6 +203,7 @@
             <button class="nav-button active" id="nav-home" data-route="home">🏠 Home</button>
             <button class="nav-button" id="nav-java" data-route="java">☕ Java</button>
             <button class="nav-button" id="nav-java-questions" data-route="java-questions">❓ Java Q&A</button>
+            <button class="nav-button" id="nav-angular" data-route="angular">🅰️ Angular</button>
             <button class="nav-button" id="nav-course" data-route="course">📚 Course</button>
         </div>
         <div class="button-group">
@@ -278,6 +279,20 @@
                     '#1ABC9C', // Turquoise
                     '#E67E22', // Dark orange
                     '#34495E'  // Dark blue-gray
+                ]
+            },
+            angular: {
+                file: 'mind-maps/angular-mind-map.md',
+                title: 'Angular Framework',
+                colors: [
+                    '#DD0031', // Angular Red for root
+                    '#C3002F', // Darker Red
+                    '#1976D2', // Blue
+                    '#0288D1', // Light Blue
+                    '#388E3C', // Green
+                    '#7B1FA2', // Purple
+                    '#FBC02D', // Yellow
+                    '#5D4037'  // Brown
                 ]
             },
             course: {
@@ -523,6 +538,8 @@
                     loadMindMap('java');
                 } else if (buttonId === 'nav-java-questions' && currentRoute !== 'java-questions') {
                     loadMindMap('java-questions');
+                } else if (buttonId === 'nav-angular' && currentRoute !== 'angular') {
+                    loadMindMap('angular');
                 } else if (buttonId === 'nav-course' && currentRoute !== 'course') {
                     loadMindMap('course');
                 }
