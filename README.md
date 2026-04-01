@@ -5,7 +5,7 @@ Initially planned to complete the System Design Master Class course.
 
 ## 📑 Quick Navigation
 
-**[Week 1](#week-1-fundamentals--scaling-basics)** • **[Week 2](#week-2-database-deep-dive--real-time-systems)** • **[Week 3](#week-3-distributed-systems--id-generation)** • **[Week 4](#week-4-service-design--advanced-patterns)**
+**[Week 1](#week-1-fundamentals--scaling-basics)** • **[Week 2](#week-2-database-deep-dive--real-time-systems)** • **[Week 3](#week-3-distributed-systems--id-generation)** • **[Week 4](#week-4-cdn-image-services--hashtags)** • **[Week 5](#week-5-cache-design--data-structures)** • **[Week 6](#week-6-storage-engines--streaming)** • **[Week 7](#week-7-search--scheduling--flash-sales)** • **[Week 8](#week-8-analytics--counting)**
 
 ---
 
@@ -13,16 +13,37 @@ Initially planned to complete the System Design Master Class course.
 
 ### 🔧 `basics/`
 Fundamental concurrency and synchronization concepts:
+- **CPU vs I/O Bound** - Understanding operation types and optimization
 - **Mutex** - Mutual exclusion for critical sections
 - **Semaphore** - Resource count-based synchronization
+- **Mind Map** - Technology stack overview
 
 ### 💾 `db/`
 Deep dive into database concepts and design:
 - **ACID Properties** - Atomicity, Consistency, Isolation, Durability
 - **Write-Ahead Logging (WAL)** - Durability mechanism
 - **Write Sequence** - Understanding database write operations
-- **NoSQL** - Cassandra, Graph databases
+- **Storage Engines** - How databases store data
+- **Indexes** - Dense vs sparse, types and use cases
+- **Two-Phase Commit** - Distributed transaction protocol
+- **B+ Trees vs LSM Trees** - Database engine comparison
+- **NoSQL** - Cassandra, Graph databases, LSM trees, SSTables, Memtables
 - **Q&A** - Common database interview questions
+
+### 🗃️ `cache/`
+- **Single Node Cache** - `TODO` - Stub, needs implementation details
+- **Distributed Cache** - `TODO` - Stub, needs detailed content
+- **Redis** - Single-threaded event loop, connection handling, Java implementation
+
+### 🌳 `data-structures/`
+- **B+ Tree** - Structure, operations, database usage
+- **Bloom Filter** - `TODO` - Stub, only has minimal use case notes
+
+### 🧠 `mind-map-interactive/`
+Interactive web-based mind map viewer for system design, Java, and Angular topics. Deployed via GitHub Actions.
+
+### 🤖 `prompts/`
+Claude Code prompt templates: code review, debugging, architecture, performance, technical writing.
 
 ---
 
@@ -128,7 +149,7 @@ Deep dive into database concepts and design:
    - **Durability:** Changes are permanent after commit (via WAL)
    - **Isolation:** Concurrent transactions execute independently
 
-2. **Database Locking**
+2. **Database Locking** - `TODO` - Partial content, sections marked as "(fill)"
    - Need for locking in high-contention scenarios
    - Use cases: Fixed inventory (IRCTC, BookMyShow, flash sales)
    - **Pessimistic Locking:**
@@ -221,7 +242,7 @@ Deep dive into database concepts and design:
    - Load balancing algorithms (round-robin, least connections, etc.)
    - Sticky sessions and session affinity
 
-2. **Distributed Locks**
+2. **Distributed Locks** - `TODO` - Partial content, needs review
    - Lock-free data structures
    - Distributed consensus protocols
    - Handling network partitions
@@ -298,6 +319,114 @@ Deep dive into database concepts and design:
 - Clock synchronization is critical for distributed ID generation
 - Batch allocation reduces network overhead significantly
 - Trade-off: sequential ordering vs even load distribution
+
+---
+
+### Week 4: CDN, Image Services & Hashtags
+
+#### Day 1: Content Delivery & Image Services
+**Topics:**
+
+1. **CDN** - `TODO` - Stub, only has basic overview
+   - What CDN is and how it works
+
+2. **Image Upload Service**
+   - Architecture and database schema
+   - Pre-signed URLs for direct-to-S3 uploads
+   - Java examples and client-side upload code
+   - Security considerations
+
+3. **Gravatar System Design**
+   - Requirements, database schema, indexes
+   - API design and CDN architecture
+   - Workflow and scaling considerations
+
+---
+
+#### Day 2: Social Features
+**Topics:**
+
+1. **Hashtag Service (Instagram)** - `TODO` - Stub, only has high-level brainstorm notes
+   - Trade-off questions and initial design thoughts
+
+2. **Newly Unread Indicator**
+   - On-the-fly vs pre-computed approaches
+   - Implementation examples, pros/cons analysis
+   - Scaling recommendations
+
+---
+
+### Week 5: Cache Design & Data Structures
+
+#### Day 1: Cache Implementation
+**Topics:**
+
+1. **Designing a Single Node Cache** - `TODO` - Stub, needs implementation details
+   - Communication protocol, storage, threading, memory measurement
+
+2. **Designing a Distributed Cache** - `TODO` - Stub, needs detailed content
+   - Overview of approaches: proxy-based, client-side, etc.
+
+---
+
+#### Day 2: Storage Without Traditional DBs
+**Topics:**
+
+1. **Word Dictionary Without Any DB** - `TODO` - Stub, only has requirements and basic CSV approach
+2. **`0.md`** - `TODO` - Empty file
+3. **Superfast Persistent KV Store** - `TODO` - Stub, only has requirements and beginning of solution
+
+---
+
+### Week 6: Storage Engines & Streaming
+
+#### Day 1: Data Storage & Ingestion
+**Topics:**
+
+1. **LSM Tree**
+   - Comprehensive explanation of Log-Structured Merge trees
+   - Links to related topics (SSTables, Memtables)
+
+2. **Multi-tier Datastore**
+   - Scaling data across hot/cold storage
+   - Access patterns and data movement process
+   - Read path decision logic and architecture flow
+
+3. **Data Ingestion** - `TODO` - Stub, only has a video reference note
+
+---
+
+#### Day 2: Streaming & Object Storage
+**Topics:**
+
+1. **Live Streaming**
+   - HLS protocol and FFmpeg chunking
+   - Adaptive bitrate streaming
+   - Server-side ad insertion with Java pseudocode
+
+2. **Designing S3** - `TODO` - Stub, only has high-level three-piece architecture overview
+
+---
+
+### Week 7: Search, Scheduling & Flash Sales
+
+> **`TODO`** - All files in this week are empty
+
+#### Day 1:
+1. **Recent Searches** - `TODO` - Empty
+
+#### Day 2:
+1. **Distributed Task Scheduler** - `TODO` - Empty
+2. **Flash Sale** - `TODO` - Empty
+3. **Flash Sale with High Volume Items** - `TODO` - Empty
+
+---
+
+### Week 8: Analytics & Counting
+
+> **`TODO`** - Content not yet written
+
+1. **Impression Counting** - `TODO` - Stub, only has introductory question
 
 ---
 

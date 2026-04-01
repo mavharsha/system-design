@@ -2,9 +2,9 @@
 
 This folder contains custom prompts for various use cases.
 
-## Using with Cursor
+## Using with Claude Code
 
-These prompts are set up for easy access in Cursor using slash commands:
+These prompts can be used as slash commands in Claude Code:
 
 | Command | Prompt File | Description |
 |---------|-------------|-------------|
@@ -16,9 +16,7 @@ These prompts are set up for easy access in Cursor using slash commands:
 | `/arch` | architecture-advisor.md | Architecture guidance |
 | `/notes` | technical-writer.md | Technical notes |
 
-**To use:** Select code/text → Type `/` in Cursor chat → Choose command
-
-See [../.cursor/README.md](../.cursor/README.md) for setup details.
+**To use:** Reference the prompt file in Claude Code or use the corresponding slash command.
 
 ## Available Prompts
 
@@ -84,4 +82,3 @@ Brief description of what notes this prompt creates
 - Document the use case and expected outcomes
 - Include examples of successful outputs when relevant
 - Update prompts based on what works well
-

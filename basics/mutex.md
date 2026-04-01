@@ -1,7 +1,7 @@
 ## Mutex
 
 ```
-Analogy: A single to the bathroom. 
+Analogy: A single bathroom accessed by multiple people one after the other.
 ```
 
 Also known as mutual exclusion, is a synchronization primitive that prevents multiple threads from accessing a shared resource or
